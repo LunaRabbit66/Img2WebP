@@ -5,9 +5,6 @@ namespace Png2WebP.Service
 {
     internal static class ConvertWebP
     {
-        // ImageSharpの排他制御用ロック
-        private static readonly object imageSharpLock = new();
-
         /// <summary>
         /// 画像ファイルをWebPに変換
         /// </summary>
