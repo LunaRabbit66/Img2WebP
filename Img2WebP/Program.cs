@@ -13,6 +13,7 @@ namespace Img2WebP
 
         static void Main(string[] args)
         {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.WriteLine($"Img2WebP");
 
             if (args.Length == 0) return;
