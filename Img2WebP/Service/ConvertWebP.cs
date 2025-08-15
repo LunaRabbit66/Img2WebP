@@ -1,13 +1,9 @@
-﻿using SixLabors.ImageSharp.Formats.Webp;
-using SixLabors.ImageSharp;
+﻿using ImageMagick;
 
 namespace Png2WebP.Service
 {
     internal static class ConvertWebP
     {
-        // ImageSharpの排他制御用ロック
-        private static readonly object imageSharpLock = new();
-
         /// <summary>
         /// 画像ファイルをWebPに変換
         /// </summary>
@@ -24,15 +20,12 @@ namespace Png2WebP.Service
                 {
                     string webpFilePath = Path.ChangeExtension(pngFilePath, ".webp");
 
-                    using (Image image = Image.Load(pngFilePath))
+                    using (var image = new MagickImage(pngFilePath))
                     {
-                        var encoder = new WebpEncoder
-                        {
-                            Quality = 75, // 圧縮品質（0～100）
-                            FileFormat = WebpFileFormatType.Lossy // または Lossless
-                        };
+                        image.Format = MagickFormat.WebP;
+                        image.Quality = 75;
 
-                        image.Save(webpFilePath, encoder);
+                        image.Write(webpFilePath);
                     }
 
                     // 作成したWebPファイルのタイムスタンプを元のPNGファイルと同じにする
