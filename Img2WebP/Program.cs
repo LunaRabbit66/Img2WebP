@@ -1,5 +1,4 @@
 ﻿using Png2WebP.Service;
-using System.Runtime.CompilerServices;
 
 namespace Img2WebP
 {
@@ -11,12 +10,30 @@ namespace Img2WebP
         ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tiff", ".heic"
     };
 
+        [STAThread]
         static void Main(string[] args)
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.WriteLine($"Img2WebP");
 
-            if (args.Length == 0) return;
+            // 引数が無い場合はOpenFileDialogを表示
+            if (args.Length == 0)
+            {
+                using OpenFileDialog ofd = new()
+                {
+                    Filter = "Image Files|" + string.Join(";", allowExtension.Select(ext => "*" + ext)),
+                    Multiselect = true,
+                    Title = "Select image files to convert to WebP"
+                };
+
+                var dr = ofd.ShowDialog();
+                if (dr != DialogResult.OK)
+                {
+                    return; // キャンセル
+                }
+
+                args = ofd.FileNames;
+            }
 
             // ファイルとディレクトリを分けてリスト化
             var fileList = new List<string>();
