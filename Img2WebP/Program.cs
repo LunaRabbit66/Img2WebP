@@ -19,7 +19,6 @@ namespace Img2WebP
             // 引数が無い場合はOpenFileDialogを表示
             if (args.Length == 0)
             {
-                Application.EnableVisualStyles();
                 using OpenFileDialog ofd = new()
                 {
                     Filter = "Image Files|*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.tiff;*.heic",
