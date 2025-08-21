@@ -20,7 +20,6 @@ namespace Img2WebP
             if (args.Length == 0)
             {
                 Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault(false);
 
                 using OpenFileDialog ofd = new()
                 {
