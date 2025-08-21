@@ -20,7 +20,6 @@ namespace Img2WebP
             if (args.Length == 0)
             {
                 Application.EnableVisualStyles();
-
                 using OpenFileDialog ofd = new()
                 {
                     Filter = "Image Files|*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.tiff;*.heic",
