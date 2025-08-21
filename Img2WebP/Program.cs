@@ -21,7 +21,7 @@ namespace Img2WebP
             {
                 using OpenFileDialog ofd = new()
                 {
-                    Filter = "Image Files|*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.tiff;*.heic",
+                    Filter = "Image Files|" + string.Join(";", allowExtension.Select(ext => "*" + ext)),
                     Multiselect = true,
                     Title = "Select image files to convert to WebP"
                 };
