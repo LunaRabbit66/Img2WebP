@@ -1,6 +1,4 @@
 ﻿using Png2WebP.Service;
-using System.Runtime.CompilerServices;
-using System.Windows.Forms; // added
 
 namespace Img2WebP
 {
