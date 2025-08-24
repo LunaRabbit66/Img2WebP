@@ -16,8 +16,7 @@ namespace Img2WebP
             [Option("half-threads", Required = false, HelpText = "Use half of logical cores for parallel conversion.")]
             public bool HalfThreads { get; set; }
 
-            [Option('q', "quality", Required = false, HelpText = "Quality for WebP output (1-100). Default 75.")]
-            public int Quality { get; set; } = 75;
+            public uint Quality { get; set; } = 75u;
 
             [Option('k', "keep-original", Required = false, HelpText = "Keep original image files.")]
             public bool KeepOriginal { get; set; }
