@@ -35,16 +35,15 @@ namespace Img2WebP
             ParserResult<Options> result = Parser.Default.ParseArguments<Options>(args);
             if (result.Tag == ParserResultType.NotParsed)
             {
-                return; // ヘルプ表示など
+                return;
             }
 
             var opt = ((Parsed<Options>)result).Value;
 
-            // quality クランプ
+            // WebPの品質を指定
             uint quality = (uint)Math.Clamp(opt.Quality, 1, 100);
             bool deleteOriginal = !opt.KeepOriginal;
 
-            // 引数でパス未指定の場合はOpenFileDialog
             var pathArgs = opt.Paths?.ToArray() ?? Array.Empty<string>();
             if (pathArgs.Length == 0)
             {
@@ -55,16 +54,16 @@ namespace Img2WebP
                     Title = "Select image files to convert to WebP"
                 };
 
+                // 引数でパス未指定の場合はOpenFileDialogでファイルを選択
                 var dr = ofd.ShowDialog();
                 if (dr != DialogResult.OK)
                 {
-                    return; // キャンセル
+                    return;
                 }
 
                 pathArgs = ofd.FileNames;
             }
 
-            // ファイルとディレクトリを分けてリスト化
             var fileList = new List<string>();
             var dirList = new List<string>();
 
@@ -104,6 +103,7 @@ namespace Img2WebP
             }
 
             int logicalCores = Environment.ProcessorCount;
+            // コマンドライン引数でhalf-threadsが指定された場合は論理コア数の半分を使用
             int maxDegree = opt.HalfThreads ? Math.Max(1, logicalCores / 2) : logicalCores;
 
             Console.WriteLine($"[Process] Start: {DateTime.Now} MaxDegreeOfParallelism: {maxDegree} Quality: {quality} DeleteOriginal: {deleteOriginal}");

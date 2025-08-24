@@ -25,7 +25,7 @@ namespace Png2WebP.Service
                     using (var image = new MagickImage(pngFilePath))
                     {
                         image.Format = MagickFormat.WebP;
-                        image.Quality = quality; // Magick.NET expects uint
+                        image.Quality = quality;
 
                         image.Write(webpFilePath);
                     }
@@ -33,6 +33,7 @@ namespace Png2WebP.Service
                     // 作成したWebPファイルのタイムスタンプを元のPNGファイルと同じにする
                     TimeStampSetter.SetTimeStamp(pngFilePath, webpFilePath);
 
+                    // コマンドライン引数で--keep-originalが指定された場合は元ファイルを削除しない
                     if (deleteOriginal)
                     {
                         File.Delete(pngFilePath);
@@ -55,7 +56,6 @@ namespace Png2WebP.Service
                     }
                     else
                     {
-                        // Wait before retrying (e.g., 500ms)
                         Thread.Sleep(500);
                     }
                 }
