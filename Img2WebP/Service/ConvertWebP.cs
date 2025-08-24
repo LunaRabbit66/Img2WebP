@@ -8,7 +8,9 @@ namespace Png2WebP.Service
         /// 画像ファイルをWebPに変換
         /// </summary>
         /// <param name="pngFilePath">対象ファイルパス</param>
-        public static void ConvertToWebP(string pngFilePath)
+        /// <param name="quality">画質(1-100)</param>
+        /// <param name="deleteOriginal">元ファイルを削除するか</param>
+        public static void ConvertToWebP(string pngFilePath, uint quality = 75, bool deleteOriginal = true)
         {
             const int maxRetry = 3;
             int retryCount = 0;
@@ -23,7 +25,7 @@ namespace Png2WebP.Service
                     using (var image = new MagickImage(pngFilePath))
                     {
                         image.Format = MagickFormat.WebP;
-                        image.Quality = 75;
+                        image.Quality = quality; // Magick.NET expects uint
 
                         image.Write(webpFilePath);
                     }
@@ -31,7 +33,10 @@ namespace Png2WebP.Service
                     // 作成したWebPファイルのタイムスタンプを元のPNGファイルと同じにする
                     TimeStampSetter.SetTimeStamp(pngFilePath, webpFilePath);
 
-                    File.Delete(pngFilePath);
+                    if (deleteOriginal)
+                    {
+                        File.Delete(pngFilePath);
+                    }
 
                     Console.WriteLine($"[Converted] {webpFilePath}");
                     success = true;
@@ -43,7 +48,7 @@ namespace Png2WebP.Service
                 catch (Exception ex)
                 {
                     retryCount++;
-                    Console.WriteLine($"[Error] Failed to convert {Path.GetFileName(pngFilePath)} to WebP. Retry {retryCount}/{maxRetry}: {ex.Message}");
+                    Console.WriteLine($"[Error] Failed to convert {Path.GetFileName(pngFilePath)} to WebP (quality={quality}). Retry {retryCount}/{maxRetry}: {ex.Message}");
                     if (retryCount >= maxRetry)
                     {
                         Console.WriteLine($"[Error] Conversion of {Path.GetFileName(pngFilePath)} to WebP ultimately failed. The file will not be deleted.");

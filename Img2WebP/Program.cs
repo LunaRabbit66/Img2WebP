@@ -1,4 +1,5 @@
-﻿using Png2WebP.Service;
+﻿using CommandLine;
+using Png2WebP.Service;
 
 namespace Img2WebP
 {
@@ -6,9 +7,25 @@ namespace Img2WebP
     {
         // コンバート対象の画像拡張子を定義
         static readonly HashSet<string> allowExtension = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tiff", ".heic"
-    };
+        {
+            ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tiff", ".heic"
+        };
+
+        private class Options
+        {
+            [Option("half-threads", Required = false, HelpText = "Use half of logical cores for parallel conversion.")]
+            public bool HalfThreads { get; set; }
+
+            [Option('q', "quality", Required = false, HelpText = "Quality for WebP output (1-100). Default 75.")]
+            public int Quality { get; set; } = 75;
+
+            [Option('k', "keep-original", Required = false, HelpText = "Keep original image files.")]
+            public bool KeepOriginal { get; set; }
+
+            // 値以外の残りは位置引数的に受け取る
+            [Value(0)]
+            public IEnumerable<string>? Paths { get; set; }
+        }
 
         [STAThread]
         static void Main(string[] args)
@@ -16,8 +33,21 @@ namespace Img2WebP
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.WriteLine($"Img2WebP");
 
-            // 引数が無い場合はOpenFileDialogを表示
-            if (args.Length == 0)
+            ParserResult<Options> result = Parser.Default.ParseArguments<Options>(args);
+            if (result.Tag == ParserResultType.NotParsed)
+            {
+                return; // ヘルプ表示など
+            }
+
+            var opt = ((Parsed<Options>)result).Value;
+
+            // quality クランプ
+            uint quality = (uint)Math.Clamp(opt.Quality, 1, 100);
+            bool deleteOriginal = !opt.KeepOriginal;
+
+            // 引数でパス未指定の場合はOpenFileDialog
+            var pathArgs = opt.Paths?.ToArray() ?? Array.Empty<string>();
+            if (pathArgs.Length == 0)
             {
                 using OpenFileDialog ofd = new()
                 {
@@ -32,14 +62,14 @@ namespace Img2WebP
                     return; // キャンセル
                 }
 
-                args = ofd.FileNames;
+                pathArgs = ofd.FileNames;
             }
 
             // ファイルとディレクトリを分けてリスト化
             var fileList = new List<string>();
             var dirList = new List<string>();
 
-            foreach (string path in args)
+            foreach (string path in pathArgs)
             {
                 Console.WriteLine($"[TargetPath] {path}");
 
@@ -74,11 +104,13 @@ namespace Img2WebP
                 return;
             }
 
-            Console.WriteLine($"[Process] Start: {DateTime.Now} MaxDegreeOfParallelism: {Environment.ProcessorCount}");
+            int logicalCores = Environment.ProcessorCount;
+            int maxDegree = opt.HalfThreads ? Math.Max(1, logicalCores / 2) : logicalCores;
 
-            // 並列処理(コア数は環境によって変動)
-            var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
-            Parallel.ForEach(fileList, options, ConvertWebP.ConvertToWebP);
+            Console.WriteLine($"[Process] Start: {DateTime.Now} MaxDegreeOfParallelism: {maxDegree} Quality: {quality} DeleteOriginal: {deleteOriginal}");
+
+            var options = new ParallelOptions { MaxDegreeOfParallelism = maxDegree };
+            Parallel.ForEach(fileList, options, file => ConvertWebP.ConvertToWebP(file, quality, deleteOriginal));
 
             Console.WriteLine($"[Process] End: {DateTime.Now}");
         }

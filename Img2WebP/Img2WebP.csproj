@@ -19,6 +19,8 @@
 
   <ItemGroup>
     <PackageReference Include="Magick.NET-Q16-x64" Version="14.8.0" />
+    <!-- Command line parser for handling specified options -->
+    <PackageReference Include="CommandLineParser" Version="2.9.1" />
   </ItemGroup>
 
 </Project>
